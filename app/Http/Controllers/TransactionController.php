@@ -30,19 +30,22 @@ class TransactionController extends Controller
             ->get();
         return response()->json($transaction);
     }
-    public function reptransaction()
+    public function reptransaction($date)
     {
+        $date = Carbon::createFromFormat('d-m-Y', $date);
         $transaction = DB::table('transactions AS tr')
             ->leftJoin('couriers AS cr', 'tr.idcourier', '=', 'cr.id')
             ->leftJoin('checkouts AS co', 'co.idtransaction', '=', 'tr.id')
+            ->leftJoin('products AS pr', 'co.idproduct', '=', 'pr.id')
             ->leftJoin('users AS us', 'us.id', '=', 'tr.iduser')
             ->leftJoin('regions AS province', 'us.idprovince', '=', 'province.id')
             ->leftJoin('regions AS regency', 'us.idregency', '=', 'regency.id')
             ->leftJoin('regions AS district', 'us.iddistrict', '=', 'district.id')
             ->leftJoin('banks AS bank', 'tr.idbank', '=', 'bank.id')
             ->groupBy('tr.id')
-            ->selectRaw('tr.id, tr.datetr, tr.iduser, us.name, us.phone, us.address, province.region AS province, regency.region AS regency, district.region AS district, us.postalcode, tr.idcourier, tr.weight, cr.courier, tr.receiptnumber, cr.courierdesc ,SUM(co.subtotal) AS subtotal, tr.couriercost, tr.uniquecode, tr.transfer, tr.idbank, bank.bankname, bank.branch, tr.status')
+            ->selectRaw('tr.id, tr.datetr, pr.productname, tr.iduser, us.name, us.phone, us.address, province.region AS province, regency.region AS regency, district.region AS district, us.postalcode, tr.idcourier, tr.weight, cr.courier, tr.receiptnumber, cr.courierdesc ,SUM(co.subtotal) AS subtotal, tr.couriercost, tr.uniquecode, tr.transfer, tr.idbank, bank.bankname, bank.branch, tr.status')
             ->where('tr.status','=','4')
+            ->whereDate('tr.datetr', $date)
             ->orderBy('tr.id', 'desc')
             ->get();
         return response()->json($transaction);
@@ -259,7 +262,7 @@ class TransactionController extends Controller
                 ]);
             $notification->save();
         }
-        
+
         $notif = DB::table('notifications')
             ->where('id',$id)
             ->first();
@@ -272,7 +275,7 @@ class TransactionController extends Controller
             $notification->transaction     = false;
             $notification->save();
         }
-        
+
         $notif = DB::table('notifications')
             ->where('id',$id)
             ->first();

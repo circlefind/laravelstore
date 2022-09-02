@@ -162,7 +162,7 @@ Route::group([
     'prefix' => 'transactions'
 ], function () {
     Route::get('alltransaction', 'TransactionController@alltransaction');
-    Route::get('reptransaction', 'TransactionController@reptransaction');
+    Route::get('reptransaction/{date}', 'TransactionController@reptransaction');
     Route::get('listtransaction/{id}', 'TransactionController@listtransaction');
     Route::get('notification/{id}', 'TransactionController@notification');
     Route::post('addnotification/{id}', 'TransactionController@addnotification');
